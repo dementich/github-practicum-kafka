@@ -71,6 +71,18 @@ services:
       - "8088:8088"
     networks:
       - kafka-network
+
+  ksqldb-cli:
+    image: confluentinc/ksqldb-cli:latest
+    depends_on:
+      - kafka-0
+      - kafka-1
+      - kafka-2
+    entrypoint: /bin/sh -c 'exec ksql http://ksqldb-server:8088'
+    stdin_open: true
+    tty: true
+    networks:
+      - kafka-network
  
   ui:
     image: provectuslabs/kafka-ui:v0.7.0

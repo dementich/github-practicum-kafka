@@ -1,0 +1,1 @@
+{"Trus": ["Shurik", "Nina", "Saakhov"], "Balbes": ["Shurik", "Nina", "Saakhov"], "Byvaly": ["Shurik", "Nina", "Saakhov"], "Shurik": ["Trus", "Balbes", "Byvaly"], "Nina": ["Trus", "Balbes", "Byvaly", "Saakhov"], "Saakhov": ["Nina", "Trus", "Balbes", "Byvaly"]}
