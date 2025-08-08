@@ -5,7 +5,7 @@ import json
 def loadBlackDict(fileName):
 	try:
 		with open(fileName, 'r') as srcFile:
-			return json.load(fileName)
+			return json.load(srcFile)
 	except FileNotFoundError:
 		print(f'Error: "{fileName}" not found.')
 	except json.JSONDecodeError:

@@ -2,7 +2,7 @@
 
 import json
 
-def loadBlackDict(fileName):
+def loadUsers(fileName):
 	try:
 		with open(fileName, 'r') as srcFile:
 			return json.load(srcFile)
@@ -12,7 +12,7 @@ def loadBlackDict(fileName):
 		print(f'Error: Invalid JSON format in "{fileName}"')
 
 def main():
-	print(loadBlackDict('./blackList.json'))
+	print(loadUsers('./users.json'))
 
 if __name__ == '__main__':
 	main()
