@@ -57,7 +57,7 @@ def produce_messages(message_count):
 		producer.produce(topic='messages', key=msg_header, value=json.dumps(msg_val), on_delivery=handle_delivery)
 		if (i + 1) % 50_000 == 0:
 			producer.flush()
-		time.sleep(random.randint(1, 5))
+		#time.sleep(random.randint(1, 5))
 	producer.flush()
 
 def main():

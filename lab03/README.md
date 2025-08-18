@@ -14,24 +14,19 @@
 
 1.	Поднимаем кластер с kafka зайдя в каталог с файлом docker-compose.yaml и запустив команду docker compose -f docker-compose.yaml up -d. Ему надо, чтобы были свободны порты 9094, 9095, 9096, 8088 и 8085.
 
-2.	Создаем топики:
-
-```bash
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic blocked_users --bootstrap-server 127.0.0.1:9092 --partitions 8 --replication-factor 3
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic censored_words --bootstrap-server 127.0.0.1:9092 --partitions 8 --replication-factor 3
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic filtered_messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
-```
+2.	Создаем топики запустив скрипт `create_topics.sh`
 
 3.	Идем в браузере на 127.0.0.1:8080. Там должен отображаться пользовательский интерфейс kafka-ui и должно быть видно, что у нас 3 брокера
 
-4.	Идем на localhost:8085 в раздел Topics и создаем топики `messages`(1 партиция), `filtered_messages` (3 партиции), `blocked_users` и `censored_words`(по 8 партиций в каждом)
+4.	Запускаем обработчик входящих сообщений командой `faust -A messages_consumer worker -l info`
 
-5.	Предполагается, что все действия код выполняет в рамках определенного окружения на основе Python 3.9.23, что оно активно и что в этом окружении стоят библиотеки `confluent_kafka` и `faust`.
+5.	Запускаем генератор цензурируемых исходящих сообщений командой 
 
-6.	Запускаем обработчик входящих сообщений командой `faust -A messages_consumer worker -l info`
+```bash
+./messages_producer.py --black_list --censored_words ./censored_words.json --message_count 25
+```
 
-7.	Запускаем генератор цензурируемых исходящих сообщений командой `./messages_producer.py --black_list --censored_words ./censored_words.json --message_count 25`. Для изменения цензурируемых слов можно сначала очистить их список, запустив `./messages_producer --censored_words ./no_censore.json`, а потом запустить продюсер с каким-нибудь новым файлом со списком подлежащих ценрузированию слов.
+Для изменения цензурируемых слов можно сначала очистить их список, запустив `./messages_producer --censored_words ./no_censore.json`, а потом запустить продюсер с каким-нибудь новым файлом со списком подлежащих ценрузированию слов.
 
 # Проблемы при работе
 

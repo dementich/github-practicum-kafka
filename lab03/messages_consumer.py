@@ -5,8 +5,7 @@ import json
 from confluent_kafka import SerializingProducer
 from lab03_lib import User, deserialize_from_utf8, deserialize_from_utf8_json
 
-app = faust.App("lab03", broker="kafka://127.0.0.1:9094", store="rocksdb://", topic_partition=8)
-#app = faust.App("lab03", broker="kafka://127.0.0.1:9094", store="memory://", topic_partition=8)
+app = faust.App("lab03", broker="kafka://127.0.0.1:9094", store="rocksdb://", topic_partition=3)
 tbl_blocked_users = app.GlobalTable('tbl_blocked_users', default=str)
 tbl_censored_words = app.GlobalTable('tbl_censored_words', default=str)
 tpc_blocked_users = app.topic('blocked_users')
