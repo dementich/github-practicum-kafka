@@ -11,7 +11,7 @@ from datetime import datetime
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--black_list', action='store_true')
-parser.add_argument('--censored_words', action='store_true')
+parser.add_argument('--censored_words', type=str)
 parser.add_argument('--message_count', type=int)
 
 conf_text = {	'bootstrap.servers': '127.0.0.1:9094',
@@ -33,8 +33,8 @@ def produce_black_list():
 		producer.produce(topic='blocked_users', key=user.name, value=user)
 	producer.flush()
 
-def produce_censored_words():
-	censored_words = [word for word in load_json('./censored_words.json')]
+def produce_censored_words(file):
+	censored_words = [word for word in load_json(file)]
 	producer = SerializingProducer(conf_text)
 	producer.produce(topic='censored_words', key='word_list', value=json.dumps(censored_words))
 	producer.flush()
@@ -43,8 +43,9 @@ def produce_messages(message_count):
 	users = load_users('./users.json')
 	producer = SerializingProducer(conf_text)
 	for i in range(message_count):
-		msg_header = f'key={i}'
-		msg_val = {'sender': random.choice(users).name, 'receiver': random.choice(users).name, 'payload': generate_random_sentence()}
+		sender, receiver, payload = random.choice(users).name, random.choice(users).name, generate_random_sentence()
+		msg_header = f'key={sender}'
+		msg_val = {'sender': sender, 'receiver': receiver, 'payload': payload}
 		producer.produce(topic='messages', key=msg_header, value=json.dumps(msg_val))
 		if (i + 1) % 50_000 == 0:
 			producer.flush()
@@ -55,8 +56,8 @@ def main():
 	if args.black_list:
 		produce_black_list()
 	if args.censored_words:
-		produce_censored_words()
-	if args.message_count > 0:
+		produce_censored_words(args.censored_words)
+	if args.message_count and args.message_count > 0:
 		produce_messages(args.message_count)
 
 if __name__ == "__main__":

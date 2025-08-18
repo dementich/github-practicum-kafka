@@ -17,8 +17,8 @@
 2.	Создаем топики:
 
 ```bash
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic users --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
-ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic censored_words --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic blocked_users --bootstrap-server 127.0.0.1:9092 --partitions 8 --replication-factor 3
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic censored_words --bootstrap-server 127.0.0.1:9092 --partitions 8 --replication-factor 3
 ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
 ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic filtered_messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
 ```
@@ -31,7 +31,7 @@ ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /o
 
 6.	Запускаем обработчик входящих сообщений командой `faust -A messages_consumer worker -l info`
 
-7.	Запускаем генератор исходящих сообщений командой `./messages_producer.py --black_list --censored_words --message_count 25`.
+7.	Запускаем генератор цензурируемых исходящих сообщений командой `./messages_producer.py --black_list --censored_words ./censored_words.json --message_count 25`. Для изменения цензурируемых слов можно сначала очистить их список, запустив `./messages_producer --censored_words ./no_censore.json`, а потом запустить продюсер с каким-нибудь новым файлом со списком подлежащих ценрузированию слов.
 
 # Проблемы при работе
 

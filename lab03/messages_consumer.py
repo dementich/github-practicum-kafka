@@ -23,7 +23,17 @@ async def process_blocked_users(stream):
 @app.agent(tpc_censored_words)
 async def process_censored_words(stream):
 	async for words in stream:
+		if await to_be_reset(words):
+			await reset_tbl(tbl_censored_words)
+			return
 		tbl_censored_words['censored_words'] = words
+
+async def to_be_reset(msg):
+	return msg == '[]'
+
+async def reset_tbl(tbl):
+	async for key in tbl.keys():
+		del tbl[key]
 
 async def process_censored_words(data):
 	result = data
