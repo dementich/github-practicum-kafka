@@ -14,15 +14,24 @@
 
 1.	Поднимаем кластер с kafka зайдя в каталог с файлом docker-compose.yaml и запустив команду docker compose -f docker-compose.yaml up -d. Ему надо, чтобы были свободны порты 9094, 9095, 9096, 8088 и 8085.
 
-2.	Идем в браузере на 127.0.0.1:8080. Там должен отображаться пользовательский интерфейс kafka-ui и должно быть видно, что у нас 3 брокера
+2.	Создаем топики:
 
-3.	Идем на localhost:8085 в раздел Topics и создаем топики `messages`(1 партиция), `filtered_messages` (3 партиции), `blocked_users` и `censored_words`(по 8 партиций в каждом)
+```bash
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic users --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic censored_words --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
+ID=$(docker ps --no-trunc -aqf "name=lab03-kafka-0-1") && docker exec -it $ID /opt/bitnami/kafka/bin/kafka-topics.sh --create --topic filtered_messages --bootstrap-server 127.0.0.1:9092 --partitions 3 --replication-factor 3
+```
 
-4.	Предполагается, что все действия код выполняет в рамках определенного окружения на основе Python 3.9.23, что оно активно и что в этом окружении стоят библиотеки `confluent_kafka` и `faust`.
+3.	Идем в браузере на 127.0.0.1:8080. Там должен отображаться пользовательский интерфейс kafka-ui и должно быть видно, что у нас 3 брокера
 
-5.	Запускаем обработчик входящих сообщений командой `faust -A messages_consumer worker -l info`
+4.	Идем на localhost:8085 в раздел Topics и создаем топики `messages`(1 партиция), `filtered_messages` (3 партиции), `blocked_users` и `censored_words`(по 8 партиций в каждом)
 
-6.	Запускаем генератор исходящих сообщений командой `./messages_producer.py --black_list --censored_words --message_count 25`.
+5.	Предполагается, что все действия код выполняет в рамках определенного окружения на основе Python 3.9.23, что оно активно и что в этом окружении стоят библиотеки `confluent_kafka` и `faust`.
+
+6.	Запускаем обработчик входящих сообщений командой `faust -A messages_consumer worker -l info`
+
+7.	Запускаем генератор исходящих сообщений командой `./messages_producer.py --black_list --censored_words --message_count 25`.
 
 # Проблемы при работе
 
