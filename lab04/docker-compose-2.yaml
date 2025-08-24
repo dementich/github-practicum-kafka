@@ -1,0 +1,100 @@
+# Переменные окружения для кластера Kafka
+x-connect: &kafka-common-env
+  ALLOW_PLAINTEXT_LISTENER: yes
+  CLUSTER_ID: practicum-lab04
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+
+  # === КОНФИГУРАЦИЯ АРХИТЕКТУРЫ KRaft ===
+  # 1. Включение KRaft-режима
+  KAFKA_ENABLE_KRAFT: yes
+  # 2. Имена слушателей для контроллера
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  # 3. Список участников кворума контроллеров
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka101:9093,1@kafka102:9093,2@kafka103:9093
+  # 4. Роли узлов: и брокер, и контроллер
+  KAFKA_PROCESS_ROLES: broker,controller
+
+services:
+  # Kafka-брокер 1/3
+  kafka101:
+    container_name: kafka101
+    image: confluentinc/cp-kafka:latest
+    restart: always
+    ports:
+      - "9094:9094"
+      - "9991:9991"
+    environment:
+      <<: *kafka-common-env
+      KAFKA_NODE_ID: 0
+      KAFKA_JMX_PORT: 9991
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka101:9092,EXTERNAL://127.0.0.1:9094
+    networks:
+      kafka-network:
+
+  jmx-kafka101:
+    container_name: jmx_kafka101
+    image: "sscaling/jmx-prometheus-exporter"
+    restart: always
+    ports:
+      - "5556:5556"
+    environment:
+      CONFIG_YML: "/etc/jmx_exporter/config.yml"
+    volumes:
+      - ./etc/jmx_exporter/config_kafka101.yml:/etc/jmx_exporter/config.yml
+    depends_on:
+      - kafka101
+    networks:
+      - kafka-network
+
+  # Kafka-брокер 2/3
+  kafka102:
+    container_name: kafka102
+    image: confluentinc/cp-kafka:latest
+    restart: always
+    ports:
+      - "9095:9095"
+    environment:
+      <<: *kafka-common-env
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka102:9092,EXTERNAL://127.0.0.1:9095
+    networks:
+      kafka-network:
+
+  # Kafka-брокер 3/3
+  kafka103:
+    container_name: kafka103
+    image: confluentinc/cp-kafka:latest
+    restart: always
+    ports:
+      - "9096:9096"
+    environment:
+      <<: *kafka-common-env
+      KAFKA_NODE_ID: 2
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9096
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka103:9092,EXTERNAL://127.0.0.1:9096
+    networks:
+      kafka-network:
+
+  # Веб-интерфейс для управления и мониторинга Kafka
+  ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    restart: always
+    depends_on:
+      - kafka101
+      - kafka102
+      - kafka103
+    ports:
+    - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka101:9092,kafka102:9092,kafka103:9092
+      KAFKA_CLUSTERS_0_NAME: kraft
+    networks:
+      kafka-network:
+
+networks:
+  kafka-network:
+    name: kafka-network

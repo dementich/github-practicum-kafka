@@ -1,0 +1,16 @@
+global:
+  # SMTP server details for sending emails
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'cyril.bulanov@gmail.com'
+  smtp_auth_username: 'cyril.bulanov'
+  smtp_auth_password: 'Dyb3tDbc4v' # Use an app-specific password if required by your email provider
+route:
+  repeat_interval: 5m
+  group_interval: 5m
+  receiver: 'email-alerts'
+receivers:
+  - name: 'email-alerts'
+    email_configs:
+      - to: 'cyril.bulanov@yandex.ru'
+      # Optional: customize email subject
+      # subject: 'Prometheus Alert: {{ .CommonLabels.alertname }}'
